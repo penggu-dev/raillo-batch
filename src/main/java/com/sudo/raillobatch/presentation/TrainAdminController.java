@@ -7,8 +7,10 @@ import com.sudo.raillobatch.global.success.SuccessResponse;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -31,8 +33,14 @@ public class TrainAdminController {
 	}
 
 	@PostMapping("/generate/day")
-	public SuccessResponse<TrainAdminSuccess> generateDaySchedule() {
-		trainScheduleCreator.createTrainSchedule();
+	public SuccessResponse<TrainAdminSuccess> generateDaySchedule(
+		@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+	) {
+		if (date != null) {
+			trainScheduleCreator.createTrainSchedule(List.of(date));
+		} else {
+			trainScheduleCreator.createTrainSchedule();
+		}
 		return SuccessResponse.of(TrainAdminSuccess.TRAIN_SCHEDULE_CREATED);
 	}
 

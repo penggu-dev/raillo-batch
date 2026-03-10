@@ -48,11 +48,13 @@ public class TrainScheduleCreator {
 			.map(date -> date.plusDays(1))
 			.orElse(LocalDate.now());
 
+		log.info("[{}] 스케줄 생성 대상 날짜", localDate);
 		createTrainSchedule(List.of(localDate));
 	}
 
     @Transactional
 	public void createTrainSchedule(List<LocalDate> dates) {
+		log.info("[{} ~ {}] {} 일간 스케줄 생성 시작", dates.getFirst(), dates.getLast(), dates.size());
 		List<TrainSchedule> trainSchedules = new ArrayList<>();
 		List<TrainScheduleTemplate> templates = trainScheduleTemplateService.findTrainScheduleTemplate();
 
