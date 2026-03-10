@@ -44,8 +44,8 @@ spec:
                       name: raillo-secrets
                       key: DB_PW
                 - name: TRAIN_SCHEDULE_FILENAME
-                  value: "files/train_schedule.xlsx"
+                  value: "train_schedule.xlsx"
                 - name: STATION_FARE_FILENAME
-                  value: "files/station_fare.xls"
+                  value: "station_fare.xls"
                 - name: SPRING_JPA_HIBERNATE_DDL_AUTO
                   value: "none"
