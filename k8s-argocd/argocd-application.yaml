@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: raillo-batch
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/penggu-dev/raillo-batch.git
+    targetRevision: main
+    path: k8s
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: raillo
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
