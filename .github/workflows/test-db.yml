@@ -93,8 +93,8 @@ jobs:
             --spring.jpa.hibernate.ddl-auto=${{ steps.mode.outputs.batch_mode == 'init' && 'create' || 'none' }} \
             --spring.docker.compose.enabled=false \
             --BATCH_MODE=${{ steps.mode.outputs.batch_mode == 'init' && 'init' || 'day' }} \
-            --TRAIN_SCHEDULE_FILENAME=files/train_schedule.xlsx \
-            --STATION_FARE_FILENAME=files/station_fare.xls
+            --TRAIN_SCHEDULE_FILENAME=train_schedule.xlsx \
+            --STATION_FARE_FILENAME=station_fare.xls
 
       - name: Stop MySQL gracefully
         run: docker stop test-mysql
