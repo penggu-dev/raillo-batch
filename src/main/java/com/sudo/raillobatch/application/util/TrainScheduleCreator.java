@@ -54,7 +54,7 @@ public class TrainScheduleCreator {
 
     @Transactional
 	public void createTrainSchedule(List<LocalDate> dates) {
-		log.info("[{} ~ {}] {} 일간 스케줄 생성 시작", dates.getFirst(), dates.getLast(), dates.size());
+		log.info("[{} ~ {}] {} 일간 스케줄 생성 시작", dates.get(0), dates.get(dates.size() - 1), dates.size());
 		List<TrainSchedule> trainSchedules = new ArrayList<>();
 		List<TrainScheduleTemplate> templates = trainScheduleTemplateService.findTrainScheduleTemplate();
 
