@@ -1,4 +1,4 @@
-name: Build Test DB Image
+name: Run Test DB Batch
 
 on:
   schedule:
@@ -14,11 +14,8 @@ on:
           - init
           - day
 
-env:
-  TEST_DB_IMAGE: ogu1208/raillo-test-db:latest
-
 jobs:
-  build-test-db:
+  run-test-db-batch:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -42,64 +39,15 @@ jobs:
             echo "batch_mode=${{ inputs.mode }}" >> $GITHUB_OUTPUT
           fi
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Start MySQL from existing image (day mode)
-        if: steps.mode.outputs.batch_mode == 'day'
-        run: |
-          docker pull ${{ env.TEST_DB_IMAGE }} || exit 1
-          docker run -d --name test-mysql \
-            -e MYSQL_DATABASE=raillo \
-            -e MYSQL_USER=sa \
-            -e MYSQL_PASSWORD=secret \
-            -e MYSQL_ROOT_PASSWORD=secret \
-            -p 3306:3306 \
-            ${{ env.TEST_DB_IMAGE }}
-
-      - name: Start fresh MySQL (init mode)
-        if: steps.mode.outputs.batch_mode == 'init'
-        run: |
-          docker run -d --name test-mysql \
-            -e MYSQL_DATABASE=raillo \
-            -e MYSQL_USER=sa \
-            -e MYSQL_PASSWORD=secret \
-            -e MYSQL_ROOT_PASSWORD=secret \
-            -p 3306:3306 \
-            mysql:8
-
-      - name: Wait for MySQL ready
-        run: |
-          for i in $(seq 1 30); do
-            if docker exec test-mysql mysqladmin ping -h localhost -u root -psecret --silent 2>/dev/null; then
-              echo "MySQL is ready"
-              exit 0
-            fi
-            echo "Waiting for MySQL... ($i/30)"
-            sleep 2
-          done
-          echo "MySQL failed to start"
-          exit 1
-
       - name: Run batch
+        env:
+          BATCH_MODE: ${{ steps.mode.outputs.batch_mode }}
+          DB_URL: ${{ secrets.TEST_DB_URL }}
+          DB_USERNAME: ${{ secrets.TEST_DB_USERNAME }}
+          DB_PW: ${{ secrets.TEST_DB_PW }}
+          TRAIN_SCHEDULE_FILENAME: train_schedule.xlsx
+          STATION_FARE_FILENAME: station_fare.xls
+          SPRING_JPA_HIBERNATE_DDL_AUTO: ${{ steps.mode.outputs.batch_mode == 'init' && 'create' || 'none' }}
+          SPRING_DOCKER_COMPOSE_ENABLED: "false"
         run: |
-          java -jar build/libs/*.jar \
-            --spring.datasource.url=jdbc:mysql://localhost:3306/raillo?rewriteBatchedStatements=true \
-            --spring.datasource.username=sa \
-            --spring.datasource.password=secret \
-            --spring.jpa.hibernate.ddl-auto=${{ steps.mode.outputs.batch_mode == 'init' && 'create' || 'none' }} \
-            --spring.docker.compose.enabled=false \
-            --BATCH_MODE=${{ steps.mode.outputs.batch_mode == 'init' && 'init' || 'day' }} \
-            --TRAIN_SCHEDULE_FILENAME=train_schedule.xlsx \
-            --STATION_FARE_FILENAME=station_fare.xls
-
-      - name: Stop MySQL gracefully
-        run: docker stop test-mysql
-
-      - name: Commit and push test DB image
-        run: |
-          docker commit test-mysql ${{ env.TEST_DB_IMAGE }}
-          docker push ${{ env.TEST_DB_IMAGE }}
+          java -jar build/libs/*.jar
