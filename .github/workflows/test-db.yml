@@ -16,7 +16,16 @@ on:
 
 jobs:
   run-test-db-batch:
+    name: Run batch (${{ matrix.schema }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        schema:
+          - raillo_qa_v1
+          - raillo_qa_v2
+          - raillo_test
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -42,7 +51,7 @@ jobs:
       - name: Run batch
         env:
           BATCH_MODE: ${{ steps.mode.outputs.batch_mode }}
-          DB_URL: ${{ secrets.TEST_DB_URL }}
+          DB_URL: ${{ secrets.TEST_DB_BASE_URL }}${{ matrix.schema }}
           DB_USERNAME: ${{ secrets.TEST_DB_USERNAME }}
           DB_PW: ${{ secrets.TEST_DB_PW }}
           TRAIN_SCHEDULE_FILENAME: train_schedule.xlsx
