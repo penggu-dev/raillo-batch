@@ -51,7 +51,7 @@ jobs:
       - name: Run batch
         env:
           BATCH_MODE: ${{ steps.mode.outputs.batch_mode }}
-          DB_URL: ${{ secrets.TEST_DB_BASE_URL }}${{ matrix.schema }}
+          DB_URL: ${{ secrets.TEST_DB_BASE_URL }}${{ matrix.schema }}?rewriteBatchedStatements=true&profileSQL=true
           DB_USERNAME: ${{ secrets.TEST_DB_USERNAME }}
           DB_PW: ${{ secrets.TEST_DB_PW }}
           TRAIN_SCHEDULE_FILENAME: train_schedule.xlsx
