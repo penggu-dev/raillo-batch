@@ -23,9 +23,8 @@ jobs:
       max-parallel: 1
       matrix:
         schema:
-          - raillo_qa_v1
-          - raillo_qa_v2
-          - raillo_test
+          - raillo
+          - raillo_qa
     steps:
       - name: Checkout
         uses: actions/checkout@v4
